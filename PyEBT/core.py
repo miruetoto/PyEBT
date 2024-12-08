@@ -112,7 +112,7 @@ def create_maps(
     f=None,            # Signal vector (optional; defaults to `t`)
     maxtau=10,         # Maximum value for tau
     mfunc="mean",          # Method for central tendency (default: "mean")
-    vfunc="var",           # Method for variability (default: "var")
+    vfunc="volume",           # Method for variability (default: "var")
     inter_method="linear"  # Interpolation method (default: "linear")
 ):
     """
