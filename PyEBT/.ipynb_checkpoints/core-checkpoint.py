@@ -111,8 +111,8 @@ def create_maps(
     t,                 # Time vector or index
     f=None,            # Signal vector (optional; defaults to `t`)
     maxtau=10,         # Maximum value for tau
-    M="mean",          # Method for central tendency (default: "mean")
-    V="var",           # Method for variability (default: "var")
+    mfunc="mean",          # Method for central tendency (default: "mean")
+    vfunc="var",           # Method for variability (default: "var")
     inter_method="linear"  # Interpolation method (default: "linear")
 ):
     """
@@ -129,7 +129,7 @@ def create_maps(
 
     # Compute Vmap and Mmap for each value of tau
     for tau in range(2, maxtau + 1):  # Start tau from 2
-        out = ebt(t, f, tau=tau, M=M, V=V, inter_method=inter_method)  # Call ebt function
+        out = ebt(t, f, tau=tau, mfunc=mfunc, vfunc=vfunc, inter_method=inter_method)  # Call ebt function
         VM[:, tau - 1] = out["V"]  # Populate Variability map
         MM[:, tau - 1] = out["M"]  # Populate Mean map
 
