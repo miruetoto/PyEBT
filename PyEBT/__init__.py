@@ -1,4 +1,4 @@
-from PyEBT.core import f
+from PyEBT.core import ebt
 
 def __dir__():
     keys = dict.fromkeys((globals().keys()))

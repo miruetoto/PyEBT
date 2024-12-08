@@ -114,3 +114,4 @@ def ebt(t, f=None, tau=1, mfunc="mean", vfunc="var", inter_method="linear"):
         'band': band[index, :],   # Interpolated band matrix
         'knot': filtered_sampled_index # Sampled indices
     }
+
