@@ -107,3 +107,35 @@ def ebt(t, f=None, tau=1, mfunc="mean", vfunc="var", inter_method="linear"):
         'knot': filtered_sampled_index # Sampled indices
     }
 
+def create_maps(
+    t,                 # Time vector or index
+    f=None,            # Signal vector (optional; defaults to `t`)
+    maxtau=10,         # Maximum value for tau
+    M="mean",          # Method for central tendency (default: "mean")
+    V="var",           # Method for variability (default: "var")
+    inter_method="linear"  # Interpolation method (default: "linear")
+):
+    """
+    Generates Variability and Mean maps (Vmap and Mmap) for a given signal.
+    """
+    # If no signal vector is provided, use `t` as the signal and generate indices for `t`
+    if f is None:
+        f = t
+        t = np.arange(1, len(f) + 1)  # Create indices starting from 1 (like R)
+
+    # Initialize Vmap and Mmap matrices (filled with zeros)
+    VM = np.zeros((len(f), maxtau))
+    MM = np.zeros((len(f), maxtau))
+
+    # Compute Vmap and Mmap for each value of tau
+    for tau in range(2, maxtau + 1):  # Start tau from 2
+        out = ebt(t, f, tau=tau, M=M, V=V, inter_method=inter_method)  # Call ebt function
+        VM[:, tau - 1] = out["V"]  # Populate Variability map
+        MM[:, tau - 1] = out["M"]  # Populate Mean map
+
+    # Return the results as a dictionary
+    return {
+        "t": t,      # Time vector
+        "vmap": VM,  # Variability map
+        "mmap": MM   #
+     }
