@@ -139,3 +139,73 @@ def create_maps(
         "vmap": VM,  # Variability map
         "mmap": MM   #
      }
+
+def extract_signal(
+    time_vector,         # The time vector of the input data
+    signal,              # The signal vector of the input data
+    tau,                 # Parameter for signal filtering
+    M="mean",            # Method for estimating the central tendency (default: "mean")
+    V="sd",              # Method for estimating variability (default: "sd")
+    tol=0.05,            # Convergence threshold (stopping condition for iterations)
+    maxiter=100,            # Maximum number of iterations
+    interpolation="linear"  # Method for interpolation (default: "linear")
+):
+    """
+    Extracts the residual signal by iteratively filtering the input signal.
+    
+    Parameters:
+    -----------
+    time_vector : array-like
+        The time vector of the input data.
+    signal : array-like
+        The signal vector of the input data.
+    tau : float
+        Parameter for signal filtering.
+    M : str
+        Method for estimating the central tendency (default: 'mean').
+    V : str
+        Method for estimating variability (default: 'sd').
+    tol : float
+        Convergence threshold (stopping condition for iterations, default: 0.05).
+    maxiter : int
+        Maximum number of iterations (default: 100).
+    interpolation : str
+        Method for interpolation (default: 'linear').
+
+    Returns:
+    --------
+    final_residual_signal : array-like
+        The final residual signal after the filtering process.
+    """
+    
+    # Initialize with the original signal for filtering
+    prev_filtered_signal = np.array(signal, dtype=np.float64)
+    
+    # Perform the initial filtering using EBT (Envelope Band Transformation)
+    current_filtered_signal = ebt(
+        signal, tau=tau, M=M, V=V, interpolation=interpolation
+    )['M']
+    
+    # Compute the residual signal after the first filtering
+    residual_signal = signal - current_filtered_signal
+    
+    iteration = 0  # Initialize the iteration counter
+    
+    # Continue iterating until convergence or the maximum number of iterations is reached
+    while (np.max(np.abs(prev_filtered_signal - current_filtered_signal)) > tol) and (iteration < maxiter):
+        prev_filtered_signal = current_filtered_signal  # Store the signal from the previous iteration
+        
+        # Reapply filtering to the residual signal
+        current_filtered_signal = ebt(
+            residual_signal, tau=tau, M=M, V=V, interpolation=interpolation
+        )['M']
+        
+        # Update the residual signal
+        residual_signal = residual_signal - current_filtered_signal
+        
+        # Increment the iteration counter
+        iteration += 1
+    
+    # Return the final residual signal
+    final_residual_signal = residual_signal
+    return final_residual_signal
