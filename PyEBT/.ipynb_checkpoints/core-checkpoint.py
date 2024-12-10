@@ -148,7 +148,7 @@ def extract_signal(
     vfunc="sd",              # Method for estimating variability (default: "sd")
     tol=0.05,            # Convergence threshold (stopping condition for iterations)
     maxiter=100,            # Maximum number of iterations
-    interpolation="linear"  # Method for interpolation (default: "linear")
+    inter_method="linear"  # Method for interpolation (default: "linear")
 ):
     """
     Extracts the residual signal by iteratively filtering the input signal.
@@ -183,7 +183,7 @@ def extract_signal(
     
     # Perform the initial filtering using EBT (Envelope Band Transformation)
     current_filtered_signal = ebt(
-        signal, tau=tau, mfunc=mfunc, vfunc=vfunc, interpolation=interpolation
+        signal, tau=tau, mfunc=mfunc, vfunc=vfunc, inter_method=inter_method
     )['M']
     
     # Compute the residual signal after the first filtering
@@ -197,7 +197,7 @@ def extract_signal(
         
         # Reapply filtering to the residual signal
         current_filtered_signal = ebt(
-            residual_signal, tau=tau, mfunc=mfunc, vfunc=vfunc, interpolation=interpolation
+            residual_signal, tau=tau, mfunc=mfunc, vfunc=vfunc, inter_method=inter_method
         )['M']
         
         # Update the residual signal
