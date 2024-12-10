@@ -215,8 +215,4 @@ def extract_signal(
     converged = iteration < maxiter
 
     # Return the final residual signal and metadata
-    return {
-        "final_residual_signal": residual_signal,
-        "converged": converged,
-        "iterations": iteration,
-    }
+    return residual_signal
