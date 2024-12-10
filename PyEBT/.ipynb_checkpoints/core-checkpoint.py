@@ -144,68 +144,79 @@ def extract_signal(
     time_vector,         # The time vector of the input data
     signal,              # The signal vector of the input data
     tau,                 # Parameter for signal filtering
-    mfunc="mean",            # Method for estimating the central tendency (default: "mean")
-    vfunc="sd",              # Method for estimating variability (default: "sd")
+    mfunc="mean",        # Method for estimating the central tendency (default: "mean")
+    vfunc="var",         # Method for estimating variability (default: "var")
     tol=0.05,            # Convergence threshold (stopping condition for iterations)
-    maxiter=100,            # Maximum number of iterations
-    inter_method="linear"  # Method for interpolation (default: "linear")
+    maxiter=100,         # Maximum number of iterations
+    inter_method="linear" # Method for interpolation (default: "linear")
 ):
     """
-    Extracts the residual signal by iteratively filtering the input signal.
-    
+    Iteratively extracts the residual signal by applying the EBT method.
+
     Parameters:
     -----------
     time_vector : array-like
         The time vector of the input data.
     signal : array-like
         The signal vector of the input data.
-    tau : float
+    tau : int
         Parameter for signal filtering.
     mfunc : str
-        Method for estimating the central tendency (default: 'mean').
+        Method for central tendency estimation (default: "mean").
     vfunc : str
-        Method for estimating variability (default: 'sd').
+        Method for variability estimation (default: "var").
     tol : float
-        Convergence threshold (stopping condition for iterations, default: 0.05).
+        Convergence threshold for stopping condition (default: 0.05).
     maxiter : int
         Maximum number of iterations (default: 100).
-    interpolation : str
-        Method for interpolation (default: 'linear').
+    inter_method : str
+        Interpolation method used in EBT (default: "linear").
 
     Returns:
     --------
-    final_residual_signal : array-like
-        The final residual signal after the filtering process.
+    dict :
+        A dictionary containing:
+        - "final_residual_signal": The residual signal after convergence.
+        - "converged": Whether the algorithm converged within the maximum iterations.
+        - "iterations": The number of iterations performed.
     """
-    
-    # Initialize with the original signal for filtering
+    # Initialize the filtered signal and residual
     prev_filtered_signal = np.array(signal, dtype=np.float64)
-    
-    # Perform the initial filtering using EBT (Envelope Band Transformation)
-    current_filtered_signal = ebt(
-        signal, tau=tau, mfunc=mfunc, vfunc=vfunc, inter_method=inter_method
-    )['M']
-    
-    # Compute the residual signal after the first filtering
+    iteration = 0  # Track the number of iterations
+
+    # Apply EBT filtering for the first iteration
+    ebt_output = ebt(
+        time_vector, signal, tau=tau, mfunc=mfunc, vfunc=vfunc, inter_method=inter_method
+    )
+    current_filtered_signal = ebt_output['M']
     residual_signal = signal - current_filtered_signal
-    
-    iteration = 0  # Initialize the iteration counter
-    
-    # Continue iterating until convergence or the maximum number of iterations is reached
-    while (np.max(np.abs(prev_filtered_signal - current_filtered_signal)) > tol) and (iteration < maxiter):
-        prev_filtered_signal = current_filtered_signal  # Store the signal from the previous iteration
-        
-        # Reapply filtering to the residual signal
-        current_filtered_signal = ebt(
-            residual_signal, tau=tau, mfunc=mfunc, vfunc=vfunc, inter_method=inter_method
-        )['M']
-        
+
+    # Iterative refinement process
+    while (
+        np.max(np.abs(prev_filtered_signal - current_filtered_signal)) > tol
+        and iteration < maxiter
+    ):
+        # Update the filtered signal
+        prev_filtered_signal = current_filtered_signal
+
+        # Apply EBT to the residual signal
+        ebt_output = ebt(
+            time_vector, residual_signal, tau=tau, mfunc=mfunc, vfunc=vfunc, inter_method=inter_method
+        )
+        current_filtered_signal = ebt_output['M']
+
         # Update the residual signal
         residual_signal = residual_signal - current_filtered_signal
-        
-        # Increment the iteration counter
+
+        # Increment iteration counter
         iteration += 1
-    
-    # Return the final residual signal
-    final_residual_signal = residual_signal
-    return final_residual_signal
+
+    # Check convergence status
+    converged = iteration < maxiter
+
+    # Return the final residual signal and metadata
+    return {
+        "final_residual_signal": residual_signal,
+        "converged": converged,
+        "iterations": iteration,
+    }
