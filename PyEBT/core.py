@@ -144,8 +144,8 @@ def extract_signal(
     time_vector,         # The time vector of the input data
     signal,              # The signal vector of the input data
     tau,                 # Parameter for signal filtering
-    M="mean",            # Method for estimating the central tendency (default: "mean")
-    V="sd",              # Method for estimating variability (default: "sd")
+    mfunc="mean",            # Method for estimating the central tendency (default: "mean")
+    vfunc="sd",              # Method for estimating variability (default: "sd")
     tol=0.05,            # Convergence threshold (stopping condition for iterations)
     maxiter=100,            # Maximum number of iterations
     interpolation="linear"  # Method for interpolation (default: "linear")
@@ -161,9 +161,9 @@ def extract_signal(
         The signal vector of the input data.
     tau : float
         Parameter for signal filtering.
-    M : str
+    mfunc : str
         Method for estimating the central tendency (default: 'mean').
-    V : str
+    vfunc : str
         Method for estimating variability (default: 'sd').
     tol : float
         Convergence threshold (stopping condition for iterations, default: 0.05).
@@ -183,7 +183,7 @@ def extract_signal(
     
     # Perform the initial filtering using EBT (Envelope Band Transformation)
     current_filtered_signal = ebt(
-        signal, tau=tau, M=M, V=V, interpolation=interpolation
+        signal, tau=tau, mfunc=mfunc, vfunc=vfunc, interpolation=interpolation
     )['M']
     
     # Compute the residual signal after the first filtering
@@ -197,7 +197,7 @@ def extract_signal(
         
         # Reapply filtering to the residual signal
         current_filtered_signal = ebt(
-            residual_signal, tau=tau, M=M, V=V, interpolation=interpolation
+            residual_signal, tau=tau, mfunc=mfunc, vfunc=vfunc, interpolation=interpolation
         )['M']
         
         # Update the residual signal
